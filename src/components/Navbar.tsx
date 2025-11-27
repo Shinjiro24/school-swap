@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Plus, User, LogOut, Shield, Heart, Package } from 'lucide-react';
+import { BookOpen, Plus, User, LogOut, Shield, Heart, Package, MessageCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +11,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ThemeToggle from '@/components/ThemeToggle';
+import { cn } from '@/lib/utils';
 
 const Navbar = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      fetchUnreadCount();
+      
+      // Subscribe to new messages
+      const channel = supabase
+        .channel('unread-messages')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'messages',
+            filter: `receiver_id=eq.${user.id}`
+          },
+          () => {
+            fetchUnreadCount();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  const fetchUnreadCount = async () => {
+    if (!user) return;
+    
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', user.id)
+      .eq('read', false);
+    
+    setUnreadCount(count || 0);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -30,8 +74,25 @@ const Navbar = () => {
         </Link>
         
         <div className="flex items-center gap-2">
+          <ThemeToggle />
+          
           {user ? (
             <>
+              {/* Messages button with unread indicator */}
+              <Button asChild variant="ghost" size="icon" className="relative">
+                <Link to="/messages">
+                  <MessageCircle className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className={cn(
+                      "absolute -top-1 -right-1 h-5 min-w-[20px] rounded-full bg-accent text-accent-foreground text-xs font-medium flex items-center justify-center px-1",
+                      unreadCount > 99 && "text-[10px]"
+                    )}>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              </Button>
+              
               <Button asChild variant="default" size="sm" className="hidden sm:flex">
                 <Link to="/create-listing">
                   <Plus className="w-4 h-4 mr-2" />
@@ -56,6 +117,17 @@ const Navbar = () => {
                     <Link to="/favorites" className="cursor-pointer">
                       <Heart className="w-4 h-4 mr-2" />
                       Favorites
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/messages" className="cursor-pointer">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Messages
+                      {unreadCount > 0 && (
+                        <span className="ml-auto bg-accent text-accent-foreground text-xs px-1.5 py-0.5 rounded-full">
+                          {unreadCount}
+                        </span>
+                      )}
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (

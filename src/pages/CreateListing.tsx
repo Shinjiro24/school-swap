@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
+import ImageUpload from '@/components/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Upload, X } from 'lucide-react';
 import { z } from 'zod';
 
 const CATEGORIES = ['books', 'notebooks', 'calculators', 'supplies', 'stationery', 'other'];
@@ -36,25 +36,9 @@ const CreateListing = () => {
     category: ''
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (images.length + files.length > 5) {
-      toast.error('Maximum 5 images allowed');
-      return;
-    }
-
-    const newImages = [...images, ...files].slice(0, 5);
+  const handleImagesChange = (newImages: File[], newPreviews: string[]) => {
     setImages(newImages);
-
-    const newPreviews = newImages.map(file => URL.createObjectURL(file));
-    previews.forEach(preview => URL.revokeObjectURL(preview));
     setPreviews(newPreviews);
-  };
-
-  const removeImage = (index: number) => {
-    URL.revokeObjectURL(previews[index]);
-    setImages(images.filter((_, i) => i !== index));
-    setPreviews(previews.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -154,7 +138,7 @@ const CreateListing = () => {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price ($) *</Label>
+                  <Label htmlFor="price">Price (€) *</Label>
                   <Input
                     id="price"
                     type="number"
@@ -186,36 +170,12 @@ const CreateListing = () => {
 
               <div className="space-y-2">
                 <Label>Images * (1-5 images)</Label>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {previews.map((preview, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
-                      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={() => removeImage(index)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  
-                  {images.length < 5 && (
-                    <label className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 transition-colors cursor-pointer flex flex-col items-center justify-center gap-2">
-                      <Upload className="w-8 h-8 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Upload Image</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                        multiple
-                      />
-                    </label>
-                  )}
-                </div>
+                <ImageUpload
+                  images={images}
+                  previews={previews}
+                  onChange={handleImagesChange}
+                  maxImages={5}
+                />
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>

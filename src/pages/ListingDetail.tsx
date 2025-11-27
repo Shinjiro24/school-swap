@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
+import QRCodeModal from '@/components/QRCodeModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Heart, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Heart, MessageCircle, ArrowLeft, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +21,7 @@ const ListingDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
   const [message, setMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
 
@@ -158,7 +160,7 @@ const ListingDetail = () => {
                 <h1 className="text-3xl font-bold">{listing.title}</h1>
                 <Badge>{listing.category}</Badge>
               </div>
-              <p className="text-4xl font-bold text-primary mb-4">${listing.price.toFixed(2)}</p>
+              <p className="text-4xl font-bold text-primary mb-4">€{listing.price.toFixed(2)}</p>
               <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
             </div>
 
@@ -188,6 +190,13 @@ const ListingDetail = () => {
               >
                 <Heart className={`w-5 h-5 ${isFavorite ? 'fill-accent text-accent' : ''}`} />
               </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowQRCode(true)}
+              >
+                <QrCode className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </div>
@@ -216,6 +225,13 @@ const ListingDetail = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <QRCodeModal
+        open={showQRCode}
+        onOpenChange={setShowQRCode}
+        listingId={listing.id}
+        listingTitle={listing.title}
+      />
     </div>
   );
 };
