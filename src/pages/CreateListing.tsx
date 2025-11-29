@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,16 +10,41 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { BookOpen, FileText } from 'lucide-react';
 
 const CATEGORIES = ['books', 'notebooks', 'calculators', 'supplies', 'stationery', 'other'];
+const BORROW_CATEGORIES = ['study_notes', 'worksheets', 'posters'];
+
+const CLASS_LEVELS = ['5', '6', '7', '8', '9', '10', '11', '12', '13'];
+
+const SUBJECTS = [
+  'Mathematics', 'German', 'English', 'French', 'Spanish', 'Latin',
+  'Physics', 'Chemistry', 'Biology', 'History', 'Geography', 'Politics',
+  'Art', 'Music', 'Sports', 'Computer Science', 'Economics', 'Other'
+];
+
+const PAYMENT_METHODS = [
+  { id: 'cash', label: 'Cash (Barzahlung)' },
+  { id: 'visa', label: 'Visa / Credit Card' },
+  { id: 'apple_pay', label: 'Apple Pay' },
+  { id: 'paypal', label: 'PayPal' },
+];
+
+interface PickupLocation {
+  id: string;
+  name: string;
+  description: string;
+}
 
 const listingSchema = z.object({
   title: z.string().trim().min(3, 'Title must be at least 3 characters').max(100, 'Title too long'),
   description: z.string().trim().min(10, 'Description must be at least 10 characters').max(1000, 'Description too long'),
   price: z.number().min(0, 'Price must be positive').max(10000, 'Price too high'),
-  category: z.enum(['books', 'notebooks', 'calculators', 'supplies', 'stationery', 'other'])
+  category: z.string().min(1, 'Please select a category')
 });
 
 const CreateListing = () => {
@@ -28,17 +53,48 @@ const CreateListing = () => {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [listingType, setListingType] = useState<'sale' | 'borrow'>('sale');
+  const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
-    category: ''
+    category: '',
+    class_level: '',
+    subject: '',
+    pickup_location_id: '',
+    payment_methods: [] as string[],
+    borrow_duration_days: '7'
   });
+
+  useEffect(() => {
+    fetchPickupLocations();
+  }, []);
+
+  const fetchPickupLocations = async () => {
+    const { data } = await supabase
+      .from('pickup_locations')
+      .select('*')
+      .order('name');
+    
+    if (data) {
+      setPickupLocations(data);
+    }
+  };
 
   const handleImagesChange = (newImages: File[], newPreviews: string[]) => {
     setImages(newImages);
     setPreviews(newPreviews);
+  };
+
+  const handlePaymentMethodChange = (methodId: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      payment_methods: checked 
+        ? [...prev.payment_methods, methodId]
+        : prev.payment_methods.filter(m => m !== methodId)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,9 +104,11 @@ const CreateListing = () => {
     setLoading(true);
 
     try {
+      const price = listingType === 'borrow' ? 0 : parseFloat(formData.price);
+      
       const validated = listingSchema.parse({
         ...formData,
-        price: parseFloat(formData.price)
+        price
       });
 
       if (images.length === 0) {
@@ -83,7 +141,14 @@ const CreateListing = () => {
         category: validated.category,
         seller_id: user.id,
         images: imageUrls,
-        status: 'pending'
+        status: 'pending',
+        listing_type: listingType,
+        class_level: formData.class_level || null,
+        subject: formData.subject || null,
+        pickup_location_id: formData.pickup_location_id || null,
+        payment_method: listingType === 'sale' ? formData.payment_methods : [],
+        is_borrowable: listingType === 'borrow',
+        borrow_duration_days: listingType === 'borrow' ? parseInt(formData.borrow_duration_days) : null
       }]);
 
       if (error) throw error;
@@ -94,12 +159,15 @@ const CreateListing = () => {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
+        console.error('Error creating listing:', error);
         toast.error('Failed to create listing');
       }
     } finally {
       setLoading(false);
     }
   };
+
+  const categories = listingType === 'borrow' ? BORROW_CATEGORIES : CATEGORIES;
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,12 +180,26 @@ const CreateListing = () => {
             <CardDescription>Your listing will be reviewed by an admin before it goes live</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Listing Type Tabs */}
+            <Tabs value={listingType} onValueChange={(v) => setListingType(v as 'sale' | 'borrow')} className="mb-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="sale" className="gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Sell Item
+                </TabsTrigger>
+                <TabsTrigger value="borrow" className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Lend Notes (Verleihen)
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
-                  placeholder="e.g., Calculus Textbook"
+                  placeholder={listingType === 'borrow' ? 'e.g., Math Notes Chapter 5' : 'e.g., Calculus Textbook'}
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
@@ -128,7 +210,9 @@ const CreateListing = () => {
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the condition, any markings, etc..."
+                  placeholder={listingType === 'borrow' 
+                    ? 'Describe your notes, topics covered, etc...'
+                    : 'Describe the condition, any markings, etc...'}
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -137,19 +221,41 @@ const CreateListing = () => {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price (€) *</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    required
-                  />
-                </div>
+                {listingType === 'sale' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Price (€) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      required
+                    />
+                  </div>
+                )}
+
+                {listingType === 'borrow' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Borrow Duration (days)</Label>
+                    <Select 
+                      value={formData.borrow_duration_days} 
+                      onValueChange={(value) => setFormData({ ...formData, borrow_duration_days: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 days</SelectItem>
+                        <SelectItem value="7">1 week</SelectItem>
+                        <SelectItem value="14">2 weeks</SelectItem>
+                        <SelectItem value="30">1 month</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="category">Category *</Label>
@@ -158,15 +264,97 @@ const CreateListing = () => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map(cat => (
+                      {categories.map(cat => (
                         <SelectItem key={cat} value={cat}>
-                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                          {cat.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
+              {/* Class Level & Subject Filters */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="class_level">Class Level (optional)</Label>
+                  <Select value={formData.class_level} onValueChange={(value) => setFormData({ ...formData, class_level: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select class" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Not specified</SelectItem>
+                      {CLASS_LEVELS.map(level => (
+                        <SelectItem key={level} value={level}>
+                          Class {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject (optional)</Label>
+                  <Select value={formData.subject} onValueChange={(value) => setFormData({ ...formData, subject: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Not specified</SelectItem>
+                      {SUBJECTS.map(subject => (
+                        <SelectItem key={subject} value={subject}>
+                          {subject}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Pickup Location */}
+              <div className="space-y-2">
+                <Label htmlFor="pickup_location">Pickup Location (optional)</Label>
+                <Select 
+                  value={formData.pickup_location_id} 
+                  onValueChange={(value) => setFormData({ ...formData, pickup_location_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Where can buyers pick up?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No specific location</SelectItem>
+                    {pickupLocations.map(location => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name} - {location.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Payment Methods (only for sale) */}
+              {listingType === 'sale' && (
+                <div className="space-y-3">
+                  <Label>Accepted Payment Methods</Label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {PAYMENT_METHODS.map(method => (
+                      <div key={method.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={method.id}
+                          checked={formData.payment_methods.includes(method.id)}
+                          onCheckedChange={(checked) => handlePaymentMethodChange(method.id, checked as boolean)}
+                        />
+                        <label
+                          htmlFor={method.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {method.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Images * (1-5 images)</Label>
@@ -179,7 +367,7 @@ const CreateListing = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Listing'}
+                {loading ? 'Creating...' : listingType === 'borrow' ? 'Create Borrowable Listing' : 'Create Listing'}
               </Button>
             </form>
           </CardContent>

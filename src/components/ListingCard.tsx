@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
+import { Heart, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ListingCardProps {
   listing: {
@@ -14,6 +15,10 @@ interface ListingCardProps {
     price: number;
     category: string;
     images: string[];
+    class_level?: string;
+    subject?: string;
+    listing_type?: string;
+    seller_id?: string;
     seller?: {
       name: string;
       grade: string;
@@ -24,6 +29,7 @@ interface ListingCardProps {
 }
 
 const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingCardProps) => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const toggleFavorite = async (e: React.MouseEvent) => {
@@ -31,7 +37,6 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error('Please sign in to save favorites');
         return;
@@ -43,6 +48,17 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
       } else {
         await supabase.from('favorites').insert({ listing_id: listing.id, user_id: user.id });
         toast.success('Added to favorites');
+        
+        // Create notification for seller
+        if (listing.seller_id && listing.seller_id !== user.id) {
+          await supabase.from('notifications').insert({
+            user_id: listing.seller_id,
+            type: 'favorite_added',
+            title: 'Someone favorited your listing!',
+            message: `Your listing "${listing.title}" was added to favorites.`,
+            listing_id: listing.id
+          });
+        }
       }
       
       onFavoriteChange?.();
@@ -54,6 +70,7 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
   };
 
   const imageUrl = listing.images[0] || '/placeholder.svg';
+  const isBorrowable = listing.listing_type === 'borrow';
 
   return (
     <Link to={`/listing/${listing.id}`}>
@@ -64,6 +81,16 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
             alt={listing.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          
+          <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
+            {isBorrowable && (
+              <Badge className="bg-primary/90 backdrop-blur-sm">
+                <FileText className="w-3 h-3 mr-1" />
+                Lernzettel
+              </Badge>
+            )}
+          </div>
+          
           <Button
             variant="ghost"
             size="icon"
@@ -77,9 +104,29 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-2 mb-2">
             <h3 className="font-semibold text-lg line-clamp-2">{listing.title}</h3>
-            <Badge variant="secondary" className="shrink-0">{listing.category}</Badge>
+            <Badge variant="secondary" className="shrink-0">
+              {listing.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </Badge>
           </div>
-          <p className="text-2xl font-bold text-primary">${listing.price.toFixed(2)}</p>
+          
+          {(listing.class_level || listing.subject) && (
+            <div className="flex gap-1 mb-2 flex-wrap">
+              {listing.class_level && (
+                <Badge variant="outline" className="text-xs">
+                  Class {listing.class_level}
+                </Badge>
+              )}
+              {listing.subject && (
+                <Badge variant="outline" className="text-xs">
+                  {listing.subject}
+                </Badge>
+              )}
+            </div>
+          )}
+          
+          <p className="text-2xl font-bold text-primary">
+            {isBorrowable ? 'Free' : `€${listing.price.toFixed(2)}`}
+          </p>
         </CardContent>
         {listing.seller && (
           <CardFooter className="px-4 pb-4 pt-0 text-sm text-muted-foreground">
