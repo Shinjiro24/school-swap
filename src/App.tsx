@@ -13,6 +13,7 @@ import ListingDetail from "./pages/ListingDetail";
 import MyListings from "./pages/MyListings";
 import Favorites from "./pages/Favorites";
 import Messages from "./pages/Messages";
+import Transactions from "./pages/Transactions";
 import Admin from "./pages/Admin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,7 @@ const AppRoutes = () => {
       <Route path="/my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
       <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+      <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

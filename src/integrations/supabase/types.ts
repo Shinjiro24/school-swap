@@ -45,42 +45,71 @@ export type Database = {
       }
       listings: {
         Row: {
+          borrow_duration_days: number | null
           category: string
+          class_level: string | null
           created_at: string | null
           description: string
           id: string
           images: string[]
+          is_borrowable: boolean | null
+          listing_type: string | null
+          payment_method: string[] | null
+          pickup_location_id: string | null
           price: number
           seller_id: string
           status: string
+          subject: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
+          borrow_duration_days?: number | null
           category: string
+          class_level?: string | null
           created_at?: string | null
           description: string
           id?: string
           images?: string[]
+          is_borrowable?: boolean | null
+          listing_type?: string | null
+          payment_method?: string[] | null
+          pickup_location_id?: string | null
           price: number
           seller_id: string
           status?: string
+          subject?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
+          borrow_duration_days?: number | null
           category?: string
+          class_level?: string | null
           created_at?: string | null
           description?: string
           id?: string
           images?: string[]
+          is_borrowable?: boolean | null
+          listing_type?: string | null
+          payment_method?: string[] | null
+          pickup_location_id?: string | null
           price?: number
           seller_id?: string
           status?: string
+          subject?: string | null
           title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "listings_pickup_location_id_fkey"
+            columns: ["pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "pickup_locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -120,6 +149,68 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_id: string | null
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          message: string
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pickup_locations: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -143,6 +234,95 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      ratings: {
+        Row: {
+          comment: string | null
+          communication: number
+          created_at: string | null
+          id: string
+          product_quality: number | null
+          rated_user_id: string
+          rater_id: string
+          transaction_id: string
+          transaction_speed: number
+        }
+        Insert: {
+          comment?: string | null
+          communication: number
+          created_at?: string | null
+          id?: string
+          product_quality?: number | null
+          rated_user_id: string
+          rater_id: string
+          transaction_id: string
+          transaction_speed: number
+        }
+        Update: {
+          comment?: string | null
+          communication?: number
+          created_at?: string | null
+          id?: string
+          product_quality?: number | null
+          rated_user_id?: string
+          rater_id?: string
+          transaction_id?: string
+          transaction_speed?: number
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          borrow_due_date: string | null
+          borrow_returned_at: string | null
+          buyer_id: string
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          listing_id: string | null
+          payment_method: string
+          seller_id: string
+          status: string | null
+          transaction_type: string | null
+        }
+        Insert: {
+          amount: number
+          borrow_due_date?: string | null
+          borrow_returned_at?: string | null
+          buyer_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          payment_method: string
+          seller_id: string
+          status?: string | null
+          transaction_type?: string | null
+        }
+        Update: {
+          amount?: number
+          borrow_due_date?: string | null
+          borrow_returned_at?: string | null
+          buyer_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          payment_method?: string
+          seller_id?: string
+          status?: string | null
+          transaction_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

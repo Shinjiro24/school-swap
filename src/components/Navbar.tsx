@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Plus, User, LogOut, Shield, Heart, Package, MessageCircle } from 'lucide-react';
+import { BookOpen, Plus, User, LogOut, Shield, Heart, Package, MessageCircle, History } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '@/components/ThemeToggle';
+import NotificationBell from '@/components/NotificationBell';
 import { cn } from '@/lib/utils';
 
 const Navbar = () => {
@@ -78,6 +79,9 @@ const Navbar = () => {
           
           {user ? (
             <>
+              {/* Notifications */}
+              <NotificationBell />
+              
               {/* Messages button with unread indicator */}
               <Button asChild variant="ghost" size="icon" className="relative">
                 <Link to="/messages">
@@ -128,6 +132,12 @@ const Navbar = () => {
                           {unreadCount}
                         </span>
                       )}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/transactions" className="cursor-pointer">
+                      <History className="w-4 h-4 mr-2" />
+                      Transactions
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (
