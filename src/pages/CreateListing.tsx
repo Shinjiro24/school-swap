@@ -278,12 +278,12 @@ const CreateListing = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="class_level">Class Level (optional)</Label>
-                  <Select value={formData.class_level} onValueChange={(value) => setFormData({ ...formData, class_level: value })}>
+                  <Select value={formData.class_level || 'none'} onValueChange={(value) => setFormData({ ...formData, class_level: value === 'none' ? '' : value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select class" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Not specified</SelectItem>
+                      <SelectItem value="none">Not specified</SelectItem>
                       {CLASS_LEVELS.map(level => (
                         <SelectItem key={level} value={level}>
                           Class {level}
@@ -295,12 +295,12 @@ const CreateListing = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="subject">Subject (optional)</Label>
-                  <Select value={formData.subject} onValueChange={(value) => setFormData({ ...formData, subject: value })}>
+                  <Select value={formData.subject || 'none'} onValueChange={(value) => setFormData({ ...formData, subject: value === 'none' ? '' : value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select subject" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Not specified</SelectItem>
+                      <SelectItem value="none">Not specified</SelectItem>
                       {SUBJECTS.map(subject => (
                         <SelectItem key={subject} value={subject}>
                           {subject}
@@ -315,14 +315,14 @@ const CreateListing = () => {
               <div className="space-y-2">
                 <Label htmlFor="pickup_location">Pickup Location (optional)</Label>
                 <Select 
-                  value={formData.pickup_location_id} 
-                  onValueChange={(value) => setFormData({ ...formData, pickup_location_id: value })}
+                  value={formData.pickup_location_id || 'none'} 
+                  onValueChange={(value) => setFormData({ ...formData, pickup_location_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Where can buyers pick up?" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No specific location</SelectItem>
+                    <SelectItem value="none">No specific location</SelectItem>
                     {pickupLocations.map(location => (
                       <SelectItem key={location.id} value={location.id}>
                         {location.name} - {location.description}
