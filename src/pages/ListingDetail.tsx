@@ -4,11 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import QRCodeModal from '@/components/QRCodeModal';
+import BuyModal from '@/components/BuyModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Heart, MessageCircle, ArrowLeft, QrCode } from 'lucide-react';
+import { Heart, MessageCircle, ArrowLeft, QrCode, ShoppingCart, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +23,7 @@ const ListingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
   const [message, setMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
 
@@ -164,9 +166,38 @@ const ListingDetail = () => {
             <div>
               <div className="flex items-start justify-between gap-4 mb-2">
                 <h1 className="text-3xl font-bold">{listing.title}</h1>
-                <Badge>{listing.category}</Badge>
+                <div className="flex gap-2">
+                  {listing.listing_type === 'borrow' && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      <FileText className="w-3 h-3 mr-1" />
+                      Borrowable
+                    </Badge>
+                  )}
+                  <Badge>{listing.category}</Badge>
+                </div>
               </div>
-              <p className="text-4xl font-bold text-primary mb-4">€{listing.price.toFixed(2)}</p>
+              
+              <p className="text-4xl font-bold text-primary mb-2">
+                {listing.listing_type === 'borrow' ? 'Free to Borrow' : `€${listing.price.toFixed(2)}`}
+              </p>
+              
+              {listing.listing_type === 'borrow' && listing.borrow_duration_days && (
+                <p className="text-sm text-muted-foreground mb-2">
+                  Borrow period: {listing.borrow_duration_days} days
+                </p>
+              )}
+              
+              {(listing.class_level || listing.subject) && (
+                <div className="flex gap-2 mb-4">
+                  {listing.class_level && (
+                    <Badge variant="outline">Class {listing.class_level}</Badge>
+                  )}
+                  {listing.subject && (
+                    <Badge variant="outline">{listing.subject}</Badge>
+                  )}
+                </div>
+              )}
+              
               <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
             </div>
 
@@ -180,29 +211,56 @@ const ListingDetail = () => {
               </Card>
             )}
 
-            <div className="flex gap-3">
-              <Button
-                className="flex-1"
-                onClick={() => setShowMessage(true)}
-                disabled={listing.seller_id === user?.id}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Contact Seller
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={toggleFavorite}
-              >
-                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-accent text-accent' : ''}`} />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setShowQRCode(true)}
-              >
-                <QrCode className="w-5 h-5" />
-              </Button>
+            {listing.payment_method && listing.payment_method.length > 0 && listing.listing_type !== 'borrow' && (
+              <div>
+                <h3 className="font-semibold mb-2 text-sm">Accepted Payment Methods</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {listing.payment_method.map((method: string) => (
+                    <Badge key={method} variant="outline" className="capitalize">
+                      {method === 'apple_pay' ? 'Apple Pay' : method}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              {listing.seller_id !== user?.id && (
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => setShowBuyModal(true)}
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  {listing.listing_type === 'borrow' ? 'Borrow This Item' : 'Buy Now'}
+                </Button>
+              )}
+              
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowMessage(true)}
+                  disabled={listing.seller_id === user?.id}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Contact Seller
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleFavorite}
+                >
+                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-accent text-accent' : ''}`} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowQRCode(true)}
+                >
+                  <QrCode className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -238,6 +296,18 @@ const ListingDetail = () => {
         listingId={listing.id}
         listingTitle={listing.title}
       />
+
+      {user && (
+        <BuyModal
+          open={showBuyModal}
+          onOpenChange={setShowBuyModal}
+          listing={listing}
+          userId={user.id}
+          onSuccess={() => {
+            toast.success('Check your messages to coordinate with the seller!');
+          }}
+        />
+      )}
     </div>
   );
 };
