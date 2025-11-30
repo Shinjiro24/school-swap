@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const CATEGORIES = ['books', 'notebooks', 'calculators', 'supplies', 'stationery', 'study_notes', 'worksheets', 'posters', 'other'];
 
-const CLASS_LEVELS = ['5', '6', '7', '8', '9', '10', '11', '12', '13'];
+const CLASS_LEVELS = ['7', '8', '9', '10', '11', '12'];
 
 const SUBJECTS = [
   'Mathematics', 'German', 'English', 'French', 'Spanish', 'Latin',
