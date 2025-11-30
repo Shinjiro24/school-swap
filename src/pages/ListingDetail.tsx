@@ -39,7 +39,7 @@ const ListingDetail = () => {
       .from('listings')
       .select('*')
       .eq('id', id)
-      .eq('status', 'approved')
+      .in('status', ['approved', 'sold'])
       .maybeSingle();
 
     if (error || !data) {
@@ -167,6 +167,11 @@ const ListingDetail = () => {
               <div className="flex items-start justify-between gap-4 mb-2">
                 <h1 className="text-3xl font-bold">{listing.title}</h1>
                 <div className="flex gap-2">
+                  {listing.status === 'sold' && (
+                    <Badge variant="destructive" className="bg-red-500">
+                      Sold
+                    </Badge>
+                  )}
                   {listing.listing_type === 'borrow' && (
                     <Badge variant="secondary" className="bg-primary/10 text-primary">
                       <FileText className="w-3 h-3 mr-1" />
@@ -225,7 +230,11 @@ const ListingDetail = () => {
             )}
 
             <div className="flex flex-col gap-3">
-              {listing.seller_id !== user?.id && (
+              {listing.status === 'sold' ? (
+                <div className="w-full p-4 bg-muted rounded-lg text-center">
+                  <p className="text-muted-foreground font-medium">This item has been sold</p>
+                </div>
+              ) : listing.seller_id !== user?.id && (
                 <Button
                   className="w-full"
                   size="lg"
