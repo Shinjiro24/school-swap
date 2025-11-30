@@ -35,10 +35,7 @@ const ListingDetail = () => {
   const fetchListing = async () => {
     const { data, error } = await supabase
       .from('listings')
-      .select(`
-        *,
-        profiles:seller_id (name, email, grade)
-      `)
+      .select('*')
       .eq('id', id)
       .eq('status', 'approved')
       .maybeSingle();
@@ -46,9 +43,18 @@ const ListingDetail = () => {
     if (error || !data) {
       toast.error('Listing not found');
       navigate('/');
-    } else {
-      setListing({ ...data, seller: data.profiles });
+      setLoading(false);
+      return;
     }
+
+    // Fetch seller profile separately
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('name, email, grade')
+      .eq('id', data.seller_id)
+      .maybeSingle();
+
+    setListing({ ...data, seller: profileData });
     setLoading(false);
   };
 
