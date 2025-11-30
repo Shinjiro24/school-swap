@@ -19,7 +19,7 @@ import { BookOpen, FileText } from 'lucide-react';
 const CATEGORIES = ['books', 'notebooks', 'calculators', 'supplies', 'stationery', 'other'];
 const BORROW_CATEGORIES = ['study_notes', 'worksheets', 'posters'];
 
-const CLASS_LEVELS = ['5', '6', '7', '8', '9', '10', '11', '12', '13'];
+const CLASS_LEVELS = ['7', '8', '9', '10', '11', '12'];
 
 const SUBJECTS = [
   'Mathematics', 'German', 'English', 'French', 'Spanish', 'Latin',
