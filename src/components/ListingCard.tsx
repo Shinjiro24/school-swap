@@ -15,6 +15,7 @@ interface ListingCardProps {
     price: number;
     category: string;
     images: string[];
+    status?: string;
     class_level?: string;
     subject?: string;
     listing_type?: string;
@@ -71,10 +72,11 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
 
   const imageUrl = listing.images[0] || '/placeholder.svg';
   const isBorrowable = listing.listing_type === 'borrow';
+  const isSold = listing.status === 'sold';
 
   return (
     <Link to={`/listing/${listing.id}`}>
-      <Card className="overflow-hidden hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 group">
+      <Card className={`overflow-hidden hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 group ${isSold ? 'opacity-75' : ''}`}>
         <div className="relative aspect-square overflow-hidden bg-muted">
           <img
             src={imageUrl}
@@ -82,8 +84,16 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           
+          {isSold && (
+            <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+              <Badge variant="destructive" className="text-lg px-4 py-2 bg-red-500">
+                Sold
+              </Badge>
+            </div>
+          )}
+          
           <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
-            {isBorrowable && (
+            {isBorrowable && !isSold && (
               <Badge className="bg-primary/90 backdrop-blur-sm">
                 <FileText className="w-3 h-3 mr-1" />
                 Lernzettel
