@@ -73,12 +73,17 @@ const MyListings = () => {
 
     // Fetch buyer profiles
     const buyerIds = [...new Set(transactionsData?.map(t => t.buyer_id) || [])];
-    const { data: profilesData } = await supabase
-      .from('profiles')
-      .select('id, name')
-      .in('id', buyerIds.length > 0 ? buyerIds : ['']);
+    let profilesData = null;
+    
+    if (buyerIds.length > 0) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .in('id', buyerIds);
+      profilesData = data;
+    }
 
-    const profilesMap = new Map(profilesData?.map(p => [p.id, p.name]) || []);
+    const profilesMap = new Map<string, string>(profilesData?.map(p => [p.id, p.name]) || []);
 
     // Group transactions by listing
     const transactionsByListing = new Map<string, InterestedBuyer[]>();
@@ -121,66 +126,88 @@ const MyListings = () => {
   const handleAcceptBuyer = async (listing: ListingWithBuyers, buyer: InterestedBuyer) => {
     if (!user) return;
     
+    if (!confirm(`Accept purchase from ${buyer.buyer_name} for €${buyer.amount.toFixed(2)}?`)) {
+      return;
+    }
+    
     setProcessingBuyer(buyer.transaction_id);
 
     try {
-      // Update the selected transaction to completed
+      // 1. Mark listing as sold FIRST to prevent race conditions
+      const { error: listingError } = await supabase
+        .from('listings')
+        .update({ status: 'sold' })
+        .eq('id', listing.id)
+        .eq('seller_id', user.id); // Extra security check
+
+      if (listingError) {
+        console.error('Listing update error:', listingError);
+        throw new Error('Failed to update listing status');
+      }
+
+      // 2. Update the selected transaction to completed
       const { error: transactionError } = await supabase
         .from('transactions')
         .update({ 
           status: 'completed',
           completed_at: new Date().toISOString()
         })
-        .eq('id', buyer.transaction_id);
+        .eq('id', buyer.transaction_id)
+        .eq('seller_id', user.id); // Extra security check
 
-      if (transactionError) throw transactionError;
+      if (transactionError) {
+        console.error('Transaction update error:', transactionError);
+        throw new Error('Failed to complete transaction');
+      }
 
-      // Cancel all other pending transactions for this listing
+      // 3. Cancel all other pending transactions for this listing
       const otherTransactionIds = listing.interested_buyers
         .filter(b => b.transaction_id !== buyer.transaction_id)
         .map(b => b.transaction_id);
 
       if (otherTransactionIds.length > 0) {
-        await supabase
+        const { error: cancelError } = await supabase
           .from('transactions')
           .update({ status: 'cancelled' })
           .in('id', otherTransactionIds);
+        
+        if (cancelError) {
+          console.error('Cancel other transactions error:', cancelError);
+          // Don't throw - this is not critical
+        }
       }
 
-      // Mark listing as sold
-      const { error: listingError } = await supabase
-        .from('listings')
-        .update({ status: 'sold' })
-        .eq('id', listing.id);
-
-      if (listingError) throw listingError;
-
-      // Send notification to the buyer
-      await supabase.from('notifications').insert({
-        user_id: buyer.buyer_id,
-        title: 'Purchase Confirmed!',
-        message: `Your purchase of "${listing.title}" has been accepted by the seller. You can now rate the seller.`,
-        type: 'purchase_confirmed',
-        listing_id: listing.id
-      });
-
-      // Notify rejected buyers
-      for (const otherBuyer of listing.interested_buyers.filter(b => b.transaction_id !== buyer.transaction_id)) {
-        await supabase.from('notifications').insert({
-          user_id: otherBuyer.buyer_id,
-          title: 'Item Sold',
-          message: `Unfortunately, "${listing.title}" has been sold to another buyer.`,
-          type: 'purchase_rejected',
+      // 4. Send notifications (non-blocking)
+      Promise.all([
+        // Notify accepted buyer
+        supabase.from('notifications').insert({
+          user_id: buyer.buyer_id,
+          title: 'Purchase Confirmed!',
+          message: `Your purchase of "${listing.title}" has been accepted by the seller. You can now rate the seller.`,
+          type: 'purchase_confirmed',
           listing_id: listing.id
-        });
-      }
+        }),
+        // Notify rejected buyers
+        ...listing.interested_buyers
+          .filter(b => b.transaction_id !== buyer.transaction_id)
+          .map(otherBuyer => 
+            supabase.from('notifications').insert({
+              user_id: otherBuyer.buyer_id,
+              title: 'Item Sold',
+              message: `Unfortunately, "${listing.title}" has been sold to another buyer.`,
+              type: 'purchase_rejected',
+              listing_id: listing.id
+            })
+          )
+      ]).catch(err => console.error('Notification error:', err));
 
-      toast.success(`Sold to ${buyer.buyer_name}!`);
+      toast.success(`Successfully sold to ${buyer.buyer_name}!`);
       setShowBuyersDialog(false);
+      setSelectedListing(null);
       fetchListings();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error accepting buyer:', error);
-      toast.error('Failed to complete sale');
+      toast.error(error.message || 'Failed to complete sale. Please try again.');
     } finally {
       setProcessingBuyer(null);
     }
