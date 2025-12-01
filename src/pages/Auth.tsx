@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { BookOpen } from 'lucide-react';
 import { z } from 'zod';
+import smcLogo from '@/assets/smc-logo.jpeg';
 
 const signUpSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
@@ -101,10 +101,8 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
       <Card className="w-full max-w-md shadow-[var(--shadow-card)]">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-            <BookOpen className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <CardTitle className="text-2xl font-bold">School Marketplace</CardTitle>
+          <img src={smcLogo} alt="SMC Logo" className="mx-auto mb-4 w-16 h-16 rounded-full object-cover" />
+          <CardTitle className="text-2xl font-bold">Amy Johnson Gymnasium</CardTitle>
           <CardDescription>Buy and sell school items with your classmates</CardDescription>
         </CardHeader>
         <CardContent>

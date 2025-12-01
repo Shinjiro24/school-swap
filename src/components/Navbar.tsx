@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Plus, User, LogOut, Shield, Heart, Package, MessageCircle, History } from 'lucide-react';
+import { Plus, User, LogOut, Shield, Heart, Package, MessageCircle, History } from 'lucide-react';
+import smcLogo from '@/assets/smc-logo.jpeg';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,10 +69,8 @@ const Navbar = () => {
     <nav className="border-b bg-card sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <span className="hidden sm:inline">School Marketplace</span>
+          <img src={smcLogo} alt="SMC Logo" className="w-10 h-10 rounded-full object-cover" />
+          <span className="hidden sm:inline">Amy Johnson Gymnasium</span>
         </Link>
         
         <div className="flex items-center gap-2">
