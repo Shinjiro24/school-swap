@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
@@ -278,7 +278,7 @@ const Home = () => {
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">No listings found</p>
             <Button asChild className="mt-4">
-              <a href="/create-listing">Create the first listing!</a>
+              <Link to="/create-listing">Create the first listing!</Link>
             </Button>
           </div>
         ) : (
