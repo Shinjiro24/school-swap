@@ -160,7 +160,7 @@ const Home = () => {
             </TabsTrigger>
             <TabsTrigger value="borrow" className="gap-2">
               <FileText className="w-4 h-4" />
-              Borrowable (Lernzettel)
+              Borrowable (Study Notes)
             </TabsTrigger>
           </TabsList>
         </Tabs>
