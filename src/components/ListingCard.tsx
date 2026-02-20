@@ -39,24 +39,24 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
 
     try {
       if (!user) {
-        toast.error('Please sign in to save favorites');
+        toast.error('Bitte melde dich an, um Favoriten zu speichern');
         return;
       }
 
       if (isFavorite) {
         await supabase.from('favorites').delete().eq('listing_id', listing.id).eq('user_id', user.id);
-        toast.success('Removed from favorites');
+        toast.success('Von Favoriten entfernt');
       } else {
         await supabase.from('favorites').insert({ listing_id: listing.id, user_id: user.id });
-        toast.success('Added to favorites');
+        toast.success('Zu Favoriten hinzugefügt');
         
         // Create notification for seller
         if (listing.seller_id && listing.seller_id !== user.id) {
           await supabase.from('notifications').insert({
             user_id: listing.seller_id,
             type: 'favorite_added',
-            title: 'Someone favorited your listing!',
-            message: `Your listing "${listing.title}" was added to favorites.`,
+            title: 'Jemand hat dein Inserat als Favorit markiert!',
+            message: `Dein Inserat "${listing.title}" wurde zu den Favoriten hinzugefügt.`,
             listing_id: listing.id
           });
         }
@@ -64,7 +64,7 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
       
       onFavoriteChange?.();
     } catch (error) {
-      toast.error('Failed to update favorites');
+      toast.error('Favoriten konnten nicht aktualisiert werden');
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
           {isSold && (
             <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
               <Badge variant="destructive" className="text-lg px-4 py-2 bg-red-500">
-                Sold
+                Verkauft
               </Badge>
             </div>
           )}
@@ -135,7 +135,7 @@ const ListingCard = ({ listing, isFavorite = false, onFavoriteChange }: ListingC
           )}
           
           <p className="text-2xl font-bold text-primary">
-            {isBorrowable ? 'Free' : `€${listing.price.toFixed(2)}`}
+            {isBorrowable ? 'Kostenlos' : `€${listing.price.toFixed(2)}`}
           </p>
         </CardContent>
         {listing.seller && (

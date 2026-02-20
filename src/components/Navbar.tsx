@@ -99,7 +99,7 @@ const Navbar = () => {
               <Button asChild variant="default" size="sm" className="hidden sm:flex">
                 <Link to="/create-listing">
                   <Plus className="w-4 h-4 mr-2" />
-                  New Listing
+                  Neues Inserat
                 </Link>
               </Button>
               
@@ -113,19 +113,19 @@ const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/my-listings" className="cursor-pointer">
                       <Package className="w-4 h-4 mr-2" />
-                      My Listings
+                      Meine Inserate
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/favorites" className="cursor-pointer">
                       <Heart className="w-4 h-4 mr-2" />
-                      Favorites
+                      Favoriten
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/messages" className="cursor-pointer">
                       <MessageCircle className="w-4 h-4 mr-2" />
-                      Messages
+                      Nachrichten
                       {unreadCount > 0 && (
                         <span className="ml-auto bg-accent text-accent-foreground text-xs px-1.5 py-0.5 rounded-full">
                           {unreadCount}
@@ -136,7 +136,7 @@ const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/transactions" className="cursor-pointer">
                       <History className="w-4 h-4 mr-2" />
-                      Transactions
+                      Transaktionen
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (
@@ -145,7 +145,7 @@ const Navbar = () => {
                       <DropdownMenuItem asChild>
                         <Link to="/admin" className="cursor-pointer">
                           <Shield className="w-4 h-4 mr-2" />
-                          Admin Panel
+                          Admin-Bereich
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -153,14 +153,14 @@ const Navbar = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
+                    Abmelden
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
             <Button asChild variant="default">
-              <Link to="/auth">Sign In</Link>
+              <Link to="/auth">Anmelden</Link>
             </Button>
           )}
         </div>

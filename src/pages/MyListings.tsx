@@ -92,7 +92,7 @@ const MyListings = () => {
       buyers.push({
         transaction_id: t.id,
         buyer_id: t.buyer_id,
-        buyer_name: profilesMap.get(t.buyer_id) || 'Unknown User',
+        buyer_name: profilesMap.get(t.buyer_id) || 'Unbekannter Nutzer',
         payment_method: t.payment_method,
         amount: t.amount,
         created_at: t.created_at
@@ -111,14 +111,14 @@ const MyListings = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this listing?')) return;
+    if (!confirm('Möchtest du dieses Inserat wirklich löschen?')) return;
 
     const { error } = await supabase.from('listings').delete().eq('id', id);
     
     if (error) {
-      toast.error('Failed to delete listing');
+      toast.error('Inserat konnte nicht gelöscht werden');
     } else {
-      toast.success('Listing deleted');
+      toast.success('Inserat gelöscht');
       fetchListings();
     }
   };
@@ -126,7 +126,7 @@ const MyListings = () => {
   const handleAcceptBuyer = async (listing: ListingWithBuyers, buyer: InterestedBuyer) => {
     if (!user) return;
     
-    if (!confirm(`Accept purchase from ${buyer.buyer_name} for €${buyer.amount.toFixed(2)}?`)) {
+    if (!confirm(`Kauf von ${buyer.buyer_name} für €${buyer.amount.toFixed(2)} annehmen?`)) {
       return;
     }
     
@@ -182,8 +182,8 @@ const MyListings = () => {
         // Notify accepted buyer
         supabase.from('notifications').insert({
           user_id: buyer.buyer_id,
-          title: 'Purchase Confirmed!',
-          message: `Your purchase of "${listing.title}" has been accepted by the seller. You can now rate the seller.`,
+          title: 'Kauf bestätigt!',
+          message: `Dein Kauf von "${listing.title}" wurde vom Verkäufer akzeptiert. Du kannst den Verkäufer jetzt bewerten.`,
           type: 'purchase_confirmed',
           listing_id: listing.id
         }),
@@ -193,21 +193,21 @@ const MyListings = () => {
           .map(otherBuyer => 
             supabase.from('notifications').insert({
               user_id: otherBuyer.buyer_id,
-              title: 'Item Sold',
-              message: `Unfortunately, "${listing.title}" has been sold to another buyer.`,
+              title: 'Artikel verkauft',
+              message: `Leider wurde "${listing.title}" an einen anderen Käufer verkauft.`,
               type: 'purchase_rejected',
               listing_id: listing.id
             })
           )
       ]).catch(err => console.error('Notification error:', err));
 
-      toast.success(`Successfully sold to ${buyer.buyer_name}!`);
+      toast.success(`Erfolgreich an ${buyer.buyer_name} verkauft!`);
       setShowBuyersDialog(false);
       setSelectedListing(null);
       fetchListings();
     } catch (error: any) {
       console.error('Error accepting buyer:', error);
-      toast.error(error.message || 'Failed to complete sale. Please try again.');
+      toast.error(error.message || 'Verkauf konnte nicht abgeschlossen werden. Bitte versuche es erneut.');
     } finally {
       setProcessingBuyer(null);
     }
@@ -220,10 +220,10 @@ const MyListings = () => {
 
   const getStatusBadge = (status: string, interestedCount: number) => {
     const variants: Record<string, any> = {
-      pending: { variant: 'secondary', label: 'Pending Approval' },
-      approved: { variant: 'default', label: 'Available' },
-      rejected: { variant: 'destructive', label: 'Rejected' },
-      sold: { variant: 'outline', label: 'Sold', className: 'bg-green-500/10 text-green-600 border-green-500/30' }
+      pending: { variant: 'secondary', label: 'Ausstehende Genehmigung' },
+      approved: { variant: 'default', label: 'Verfügbar' },
+      rejected: { variant: 'destructive', label: 'Abgelehnt' },
+      sold: { variant: 'outline', label: 'Verkauft', className: 'bg-green-500/10 text-green-600 border-green-500/30' }
     };
     
     const config = variants[status] || variants.pending;
@@ -233,7 +233,7 @@ const MyListings = () => {
         {status === 'approved' && interestedCount > 0 && (
           <Badge variant="secondary" className="bg-primary/10 text-primary">
             <Users className="w-3 h-3 mr-1" />
-            {interestedCount} interested
+            {interestedCount} interessiert
           </Badge>
         )}
       </div>
@@ -257,7 +257,7 @@ const MyListings = () => {
   const ListingsList = ({ items }: { items: ListingWithBuyers[] }) => (
     <div className="space-y-4">
       {items.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">No listings found</p>
+        <p className="text-center text-muted-foreground py-8">Keine Inserate gefunden</p>
       ) : (
         items.map(listing => (
           <Card key={listing.id}>
@@ -283,7 +283,7 @@ const MyListings = () => {
                     {listing.status === 'approved' && (
                       <>
                         <Button asChild variant="outline" size="sm">
-                          <Link to={`/listing/${listing.id}`}>View</Link>
+                          <Link to={`/listing/${listing.id}`}>Anzeigen</Link>
                         </Button>
                         {listing.interested_buyers.length > 0 && (
                           <Button 
@@ -292,14 +292,14 @@ const MyListings = () => {
                             onClick={() => openBuyersDialog(listing)}
                           >
                             <Users className="w-4 h-4 mr-1" />
-                            View Interested ({listing.interested_buyers.length})
+                            Interessenten ({listing.interested_buyers.length})
                           </Button>
                         )}
                       </>
                     )}
                     {listing.status === 'sold' && (
                       <Button asChild variant="outline" size="sm">
-                        <Link to={`/listing/${listing.id}`}>View</Link>
+                        <Link to={`/listing/${listing.id}`}>Anzeigen</Link>
                       </Button>
                     )}
                     {listing.status !== 'sold' && (
@@ -309,7 +309,7 @@ const MyListings = () => {
                         onClick={() => handleDelete(listing.id)}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
+                        Löschen
                       </Button>
                     )}
                   </div>
@@ -327,19 +327,19 @@ const MyListings = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6">My Listings</h1>
+        <h1 className="text-3xl font-bold mb-6">Meine Inserate</h1>
         
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="all">All ({listings.length})</TabsTrigger>
-            <TabsTrigger value="pending">Pending ({filterByStatus('pending').length})</TabsTrigger>
-            <TabsTrigger value="approved">Available ({filterByStatus('approved').length})</TabsTrigger>
-            <TabsTrigger value="sold">Sold ({filterByStatus('sold').length})</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected ({filterByStatus('rejected').length})</TabsTrigger>
+            <TabsTrigger value="all">Alle ({listings.length})</TabsTrigger>
+            <TabsTrigger value="pending">Ausstehend ({filterByStatus('pending').length})</TabsTrigger>
+            <TabsTrigger value="approved">Verfügbar ({filterByStatus('approved').length})</TabsTrigger>
+            <TabsTrigger value="sold">Verkauft ({filterByStatus('sold').length})</TabsTrigger>
+            <TabsTrigger value="rejected">Abgelehnt ({filterByStatus('rejected').length})</TabsTrigger>
           </TabsList>
           
           {loading ? (
-            <div className="py-8 text-center text-muted-foreground">Loading...</div>
+            <div className="py-8 text-center text-muted-foreground">Lädt...</div>
           ) : (
             <>
               <TabsContent value="all">
@@ -366,9 +366,9 @@ const MyListings = () => {
       <Dialog open={showBuyersDialog} onOpenChange={setShowBuyersDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Interested Buyers</DialogTitle>
+          <DialogTitle>Interessierte Käufer</DialogTitle>
             <DialogDescription>
-              Choose a buyer to mark your listing as sold
+              Wähle einen Käufer aus, um das Inserat als verkauft zu markieren
             </DialogDescription>
           </DialogHeader>
           
@@ -398,11 +398,11 @@ const MyListings = () => {
                         disabled={processingBuyer !== null}
                       >
                         {processingBuyer === buyer.transaction_id ? (
-                          'Processing...'
+                          'Verarbeitung...'
                         ) : (
                           <>
                             <CheckCircle className="w-4 h-4 mr-1" />
-                            Accept
+                            Annehmen
                           </>
                         )}
                       </Button>

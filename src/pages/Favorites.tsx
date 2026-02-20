@@ -50,7 +50,7 @@ const Favorites = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">My Favorites</h1>
+        <h1 className="text-3xl font-bold mb-6">Meine Favoriten</h1>
         
         {loading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -60,8 +60,8 @@ const Favorites = () => {
           </div>
         ) : favorites.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg">No favorites yet</p>
-            <p className="text-muted-foreground">Browse listings and save your favorites!</p>
+            <p className="text-muted-foreground text-lg">Noch keine Favoriten</p>
+            <p className="text-muted-foreground">Stöbere durch Inserate und speichere deine Favoriten!</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

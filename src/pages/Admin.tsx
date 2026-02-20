@@ -108,19 +108,19 @@ const Admin = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to update listing');
+      toast.error('Inserat konnte nicht aktualisiert werden');
     } else {
-      toast.success(`Listing ${status}`);
+      toast.success(`Inserat ${status === 'approved' ? 'genehmigt' : 'abgelehnt'}`);
       
       // Create notification for seller
       if (listing) {
         await supabase.from('notifications').insert({
           user_id: listing.seller_id,
           type: status === 'approved' ? 'listing_approved' : 'listing_rejected',
-          title: status === 'approved' ? 'Listing Approved!' : 'Listing Rejected',
+          title: status === 'approved' ? 'Inserat genehmigt!' : 'Inserat abgelehnt',
           message: status === 'approved' 
-            ? `Your listing "${listing.title}" has been approved and is now visible.`
-            : `Your listing "${listing.title}" has been rejected. Please review our guidelines.`,
+            ? `Dein Inserat "${listing.title}" wurde genehmigt und ist jetzt sichtbar.`
+            : `Dein Inserat "${listing.title}" wurde abgelehnt. Bitte überprüfe unsere Richtlinien.`,
           listing_id: listing.id
         });
       }
@@ -132,14 +132,14 @@ const Admin = () => {
   };
 
   const deleteListing = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this listing?')) return;
+    if (!confirm('Möchtest du dieses Inserat wirklich löschen?')) return;
 
     const { error } = await supabase.from('listings').delete().eq('id', id);
     
     if (error) {
-      toast.error('Failed to delete listing');
+      toast.error('Inserat konnte nicht gelöscht werden');
     } else {
-      toast.success('Listing deleted');
+      toast.success('Inserat gelöscht');
       fetchListings();
       fetchStats();
       setSelectedListing(null);
@@ -161,15 +161,15 @@ const Admin = () => {
       
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
-          <p className="text-muted-foreground">Review and manage listings</p>
+          <h1 className="text-3xl font-bold mb-2">Admin-Bereich</h1>
+          <p className="text-muted-foreground">Inserate prüfen und verwalten</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <CardTitle className="text-sm font-medium">Ausstehend</CardTitle>
               <Clock className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -178,7 +178,7 @@ const Admin = () => {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Approved</CardTitle>
+              <CardTitle className="text-sm font-medium">Genehmigt</CardTitle>
               <CheckCircle className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -187,7 +187,7 @@ const Admin = () => {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+              <CardTitle className="text-sm font-medium">Abgelehnt</CardTitle>
               <XCircle className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -199,19 +199,19 @@ const Admin = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="pending" className="gap-2">
-              <Clock className="w-4 h-4" /> Pending ({stats.pending})
+              <Clock className="w-4 h-4" /> Ausstehend ({stats.pending})
             </TabsTrigger>
             <TabsTrigger value="approved" className="gap-2">
-              <CheckCircle className="w-4 h-4" /> Approved ({stats.approved})
+              <CheckCircle className="w-4 h-4" /> Genehmigt ({stats.approved})
             </TabsTrigger>
             <TabsTrigger value="rejected" className="gap-2">
-              <XCircle className="w-4 h-4" /> Rejected ({stats.rejected})
+              <XCircle className="w-4 h-4" /> Abgelehnt ({stats.rejected})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab}>
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              <div className="text-center py-8 text-muted-foreground">Lädt...</div>
             ) : listings.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
@@ -231,7 +231,7 @@ const Admin = () => {
                       <div className="absolute top-2 right-2 flex gap-1">
                         <Badge>{listing.category}</Badge>
                         {listing.listing_type === 'borrow' && (
-                          <Badge variant="secondary">Borrowable</Badge>
+                          <Badge variant="secondary">Ausleihbar</Badge>
                         )}
                       </div>
                     </div>
@@ -253,9 +253,9 @@ const Admin = () => {
                       
                       {listing.seller && (
                         <div className="text-sm text-muted-foreground mb-3 pb-3 border-b">
-                          <p className="font-medium">Seller: {listing.seller.name}</p>
+                          <p className="font-medium">Verkäufer: {listing.seller.name}</p>
                           <p>{listing.seller.email}</p>
-                          <p>Grade: {listing.seller.grade}</p>
+                          <p>Klasse: {listing.seller.grade}</p>
                         </div>
                       )}
                       
@@ -267,7 +267,7 @@ const Admin = () => {
                           onClick={() => setSelectedListing(listing)}
                         >
                           <Eye className="w-4 h-4 mr-1" />
-                          View
+                          Anzeigen
                         </Button>
                         {activeTab === 'pending' && (
                           <>
@@ -312,7 +312,7 @@ const Admin = () => {
             <>
               <DialogHeader>
                 <DialogTitle>{selectedListing.title}</DialogTitle>
-                <DialogDescription>Review listing details</DialogDescription>
+              <DialogDescription>Inseratdetails überprüfen</DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4">
@@ -328,32 +328,32 @@ const Admin = () => {
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold mb-1">Description</h4>
+                  <h4 className="font-semibold mb-1">Beschreibung</h4>
                   <p className="text-muted-foreground">{selectedListing.description}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-semibold mb-1">Price</h4>
+                    <h4 className="font-semibold mb-1">Preis</h4>
                     <p className="text-2xl font-bold text-primary">€{selectedListing.price.toFixed(2)}</p>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Category</h4>
+                    <h4 className="font-semibold mb-1">Kategorie</h4>
                     <Badge>{selectedListing.category}</Badge>
                   </div>
                 </div>
 
                 {(selectedListing.class_level || selectedListing.subject) && (
                   <div className="grid grid-cols-2 gap-4">
-                    {selectedListing.class_level && (
+                  {selectedListing.class_level && (
                       <div>
-                        <h4 className="font-semibold mb-1">Class Level</h4>
+                        <h4 className="font-semibold mb-1">Klassenstufe</h4>
                         <p>{selectedListing.class_level}</p>
                       </div>
                     )}
                     {selectedListing.subject && (
                       <div>
-                        <h4 className="font-semibold mb-1">Subject</h4>
+                        <h4 className="font-semibold mb-1">Fach</h4>
                         <p>{selectedListing.subject}</p>
                       </div>
                     )}
@@ -362,10 +362,10 @@ const Admin = () => {
 
                 {selectedListing.seller && (
                   <div>
-                    <h4 className="font-semibold mb-1">Seller Information</h4>
+                    <h4 className="font-semibold mb-1">Verkäufer-Informationen</h4>
                     <p>Name: {selectedListing.seller.name}</p>
-                    <p>Email: {selectedListing.seller.email}</p>
-                    <p>Grade: {selectedListing.seller.grade}</p>
+                    <p>E-Mail: {selectedListing.seller.email}</p>
+                    <p>Klasse: {selectedListing.seller.grade}</p>
                   </div>
                 )}
                 
@@ -377,7 +377,7 @@ const Admin = () => {
                         onClick={() => updateStatus(selectedListing.id, 'approved')}
                       >
                         <Check className="w-4 h-4 mr-2" />
-                        Approve
+                        Genehmigen
                       </Button>
                       <Button
                         variant="destructive"
@@ -385,7 +385,7 @@ const Admin = () => {
                         onClick={() => updateStatus(selectedListing.id, 'rejected')}
                       >
                         <X className="w-4 h-4 mr-2" />
-                        Reject
+                        Ablehnen
                       </Button>
                     </>
                   )}

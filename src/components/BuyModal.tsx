@@ -31,9 +31,9 @@ const PAYMENT_ICONS: Record<string, React.ReactNode> = {
 };
 
 const PAYMENT_LABELS: Record<string, string> = {
-  visa: 'Visa/Credit Card',
+  visa: 'Visa/Kreditkarte',
   apple_pay: 'Apple Pay',
-  cash: 'Cash at School',
+  cash: 'Barzahlung in der Schule',
 };
 
 const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalProps) => {
@@ -60,12 +60,12 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
 
   const handlePurchase = async () => {
     if (!selectedPayment) {
-      toast.error('Please select a payment method');
+      toast.error('Bitte wähle eine Zahlungsmethode');
       return;
     }
 
     if (selectedPayment === 'cash' && !selectedLocation) {
-      toast.error('Please select a pickup location');
+      toast.error('Bitte wähle einen Abholort');
       return;
     }
 
@@ -99,8 +99,8 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
       await supabase.from('notifications').insert({
         user_id: listing.seller_id,
         type: isBorrow ? 'borrow_request' : 'purchase',
-        title: isBorrow ? 'Someone wants to borrow your item!' : 'You have a new buyer!',
-        message: `Someone wants to ${isBorrow ? 'borrow' : 'buy'} your listing "${listing.title}"${selectedPayment === 'cash' ? '. Meet at the selected pickup location.' : '.'}`,
+        title: isBorrow ? 'Jemand möchte deinen Artikel ausleihen!' : 'Du hast einen neuen Käufer!',
+        message: `Jemand möchte dein Inserat "${listing.title}" ${isBorrow ? 'ausleihen' : 'kaufen'}${selectedPayment === 'cash' ? '. Treffe dich am gewählten Abholort.' : '.'}`,
         listing_id: listing.id,
       });
 
@@ -109,15 +109,15 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
         listing_id: listing.id,
         sender_id: userId,
         receiver_id: listing.seller_id,
-        content: `Hi! I'd like to ${isBorrow ? 'borrow' : 'buy'} "${listing.title}"${selectedPayment === 'cash' ? ` and meet at ${locations.find(l => l.id === selectedLocation)?.name || 'school'}` : ''}.${isBorrow ? ` I'll return it within ${listing.borrow_duration_days} days.` : ''} Let me know when works for you!`,
+        content: `Hallo! Ich möchte "${listing.title}" ${isBorrow ? 'ausleihen' : 'kaufen'}${selectedPayment === 'cash' ? ` und mich treffen bei ${locations.find(l => l.id === selectedLocation)?.name || 'der Schule'}` : ''}.${isBorrow ? ` Ich gebe es innerhalb von ${listing.borrow_duration_days} Tagen zurück.` : ''} Lass mich wissen, wann es passt!`,
       });
 
-      toast.success(isBorrow ? 'Borrow request sent!' : 'Purchase initiated! Contact the seller to arrange payment.');
+      toast.success(isBorrow ? 'Ausleihantrag gesendet!' : 'Kauf eingeleitet! Kontaktiere den Verkäufer zur Bezahlung.');
       onSuccess();
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating transaction:', error);
-      toast.error('Failed to process. Please try again.');
+      toast.error('Verarbeitung fehlgeschlagen. Bitte versuche es erneut.');
     } finally {
       setLoading(false);
     }
@@ -127,11 +127,11 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isBorrow ? 'Borrow Item' : 'Buy Item'}</DialogTitle>
+          <DialogTitle>{isBorrow ? 'Artikel ausleihen' : 'Artikel kaufen'}</DialogTitle>
           <DialogDescription>
             {isBorrow 
-              ? `Request to borrow "${listing.title}" for ${listing.borrow_duration_days || 7} days`
-              : `Purchase "${listing.title}" for €${listing.price.toFixed(2)}`
+              ? `Antrag auf Ausleihe von "${listing.title}" für ${listing.borrow_duration_days || 7} Tage`
+              : `"${listing.title}" für €${listing.price.toFixed(2)} kaufen`
             }
           </DialogDescription>
         </DialogHeader>
@@ -139,7 +139,7 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
         <div className="space-y-6 py-4">
           {!isBorrow && (
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Payment Method</Label>
+              <Label className="text-sm font-medium">Zahlungsmethode</Label>
               <RadioGroup value={selectedPayment} onValueChange={setSelectedPayment}>
                 {availablePayments.map((method) => (
                   <div key={method} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
@@ -157,7 +157,7 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
           {isBorrow && (
             <div className="p-4 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                This is a free borrowable item. You'll need to return it within {listing.borrow_duration_days || 7} days.
+                Dieser Artikel ist kostenlos ausleihbar. Du musst ihn innerhalb von {listing.borrow_duration_days || 7} Tagen zurückgeben.
               </p>
             </div>
           )}
@@ -166,11 +166,11 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
             <div className="space-y-3">
               <Label className="text-sm font-medium flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Pickup Location
+                Abholort
               </Label>
               <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select pickup location" />
+                  <SelectValue placeholder="Abholort auswählen" />
                 </SelectTrigger>
                 <SelectContent>
                   {locations.map((location) => (
@@ -188,9 +188,9 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
 
           <div className="border-t pt-4">
             <div className="flex justify-between items-center mb-4">
-              <span className="font-medium">Total</span>
+              <span className="font-medium">Gesamt</span>
               <span className="text-2xl font-bold text-primary">
-                {isBorrow ? 'Free' : `€${listing.price.toFixed(2)}`}
+                {isBorrow ? 'Kostenlos' : `€${listing.price.toFixed(2)}`}
               </span>
             </div>
 
@@ -199,7 +199,7 @@ const BuyModal = ({ open, onOpenChange, listing, userId, onSuccess }: BuyModalPr
               onClick={handlePurchase}
               disabled={loading || (!isBorrow && !selectedPayment) || ((selectedPayment === 'cash' || isBorrow) && !selectedLocation)}
             >
-              {loading ? 'Processing...' : isBorrow ? 'Request to Borrow' : 'Confirm Purchase'}
+              {loading ? 'Verarbeitung...' : isBorrow ? 'Ausleihe anfragen' : 'Kauf bestätigen'}
             </Button>
           </div>
         </div>
