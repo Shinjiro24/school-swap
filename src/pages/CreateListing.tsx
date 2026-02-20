@@ -22,14 +22,14 @@ const BORROW_CATEGORIES = ['study_notes', 'worksheets', 'posters'];
 const CLASS_LEVELS = ['7', '8', '9', '10', '11', '12'];
 
 const SUBJECTS = [
-  'Mathematics', 'German', 'English', 'French', 'Spanish', 'Latin',
-  'Physics', 'Chemistry', 'Biology', 'History', 'Geography', 'Politics',
-  'Art', 'Music', 'Sports', 'Computer Science', 'Economics', 'Other'
+  'Mathematik', 'Deutsch', 'Englisch', 'Französisch', 'Spanisch', 'Latein',
+  'Physik', 'Chemie', 'Biologie', 'Geschichte', 'Geographie', 'Politik',
+  'Kunst', 'Musik', 'Sport', 'Informatik', 'Wirtschaft', 'Sonstiges'
 ];
 
 const PAYMENT_METHODS = [
-  { id: 'cash', label: 'Cash (Barzahlung)' },
-  { id: 'visa', label: 'Visa / Credit Card' },
+  { id: 'cash', label: 'Barzahlung' },
+  { id: 'visa', label: 'Visa / Kreditkarte' },
   { id: 'apple_pay', label: 'Apple Pay' },
   { id: 'paypal', label: 'PayPal' },
 ];
@@ -41,10 +41,10 @@ interface PickupLocation {
 }
 
 const listingSchema = z.object({
-  title: z.string().trim().min(3, 'Title must be at least 3 characters').max(100, 'Title too long'),
-  description: z.string().trim().min(10, 'Description must be at least 10 characters').max(1000, 'Description too long'),
-  price: z.number().min(0, 'Price must be positive').max(10000, 'Price too high'),
-  category: z.string().min(1, 'Please select a category')
+  title: z.string().trim().min(3, 'Titel muss mindestens 3 Zeichen haben').max(100, 'Titel zu lang'),
+  description: z.string().trim().min(10, 'Beschreibung muss mindestens 10 Zeichen haben').max(1000, 'Beschreibung zu lang'),
+  price: z.number().min(0, 'Preis muss positiv sein').max(10000, 'Preis zu hoch'),
+  category: z.string().min(1, 'Bitte wähle eine Kategorie')
 });
 
 const CreateListing = () => {
@@ -112,7 +112,7 @@ const CreateListing = () => {
       });
 
       if (images.length === 0) {
-        toast.error('Please add at least one image');
+        toast.error('Bitte füge mindestens ein Bild hinzu');
         setLoading(false);
         return;
       }
@@ -153,14 +153,14 @@ const CreateListing = () => {
 
       if (error) throw error;
 
-      toast.success('Listing created! Waiting for admin approval.');
+      toast.success('Inserat erstellt! Warte auf Admin-Genehmigung.');
       navigate('/my-listings');
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
         console.error('Error creating listing:', error);
-        toast.error('Failed to create listing');
+        toast.error('Inserat konnte nicht erstellt werden');
       }
     } finally {
       setLoading(false);
@@ -176,30 +176,30 @@ const CreateListing = () => {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle>Create New Listing</CardTitle>
-            <CardDescription>Your listing will be reviewed by an admin before it goes live</CardDescription>
+            <CardTitle>Neues Inserat erstellen</CardTitle>
+            <CardDescription>Dein Inserat wird von einem Admin geprüft, bevor es veröffentlicht wird</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Listing Type Tabs */}
             <Tabs value={listingType} onValueChange={(v) => setListingType(v as 'sale' | 'borrow')} className="mb-6">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="sale" className="gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Sell Item
-                </TabsTrigger>
-                <TabsTrigger value="borrow" className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Lend Notes (Verleihen)
-                </TabsTrigger>
+              <TabsTrigger value="sale" className="gap-2">
+                <BookOpen className="w-4 h-4" />
+                Artikel verkaufen
+              </TabsTrigger>
+              <TabsTrigger value="borrow" className="gap-2">
+                <FileText className="w-4 h-4" />
+                Lernzettel verleihen
+              </TabsTrigger>
               </TabsList>
             </Tabs>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
+                <Label htmlFor="title">Titel *</Label>
                 <Input
                   id="title"
-                  placeholder={listingType === 'borrow' ? 'e.g., Math Notes Chapter 5' : 'e.g., Calculus Textbook'}
+                  placeholder={listingType === 'borrow' ? 'z.B. Mathe-Notizen Kapitel 5' : 'z.B. Analysis Lehrbuch'}
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
@@ -207,12 +207,12 @@ const CreateListing = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
+                <Label htmlFor="description">Beschreibung *</Label>
                 <Textarea
                   id="description"
                   placeholder={listingType === 'borrow' 
-                    ? 'Describe your notes, topics covered, etc...'
-                    : 'Describe the condition, any markings, etc...'}
+                    ? 'Beschreibe deine Notizen, behandelte Themen usw...'
+                    : 'Beschreibe den Zustand, etwaige Markierungen usw...'}
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -223,7 +223,7 @@ const CreateListing = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 {listingType === 'sale' && (
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price (€) *</Label>
+                    <Label htmlFor="price">Preis (€) *</Label>
                     <Input
                       id="price"
                       type="number"
@@ -239,29 +239,29 @@ const CreateListing = () => {
 
                 {listingType === 'borrow' && (
                   <div className="space-y-2">
-                    <Label htmlFor="duration">Borrow Duration (days)</Label>
+                    <Label htmlFor="duration">Ausleihzeit (Tage)</Label>
                     <Select 
                       value={formData.borrow_duration_days} 
                       onValueChange={(value) => setFormData({ ...formData, borrow_duration_days: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select duration" />
+                        <SelectValue placeholder="Dauer auswählen" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="3">3 days</SelectItem>
-                        <SelectItem value="7">1 week</SelectItem>
-                        <SelectItem value="14">2 weeks</SelectItem>
-                        <SelectItem value="30">1 month</SelectItem>
+                        <SelectItem value="3">3 Tage</SelectItem>
+                        <SelectItem value="7">1 Woche</SelectItem>
+                        <SelectItem value="14">2 Wochen</SelectItem>
+                        <SelectItem value="30">1 Monat</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">Kategorie *</Label>
                   <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Kategorie auswählen" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map(cat => (
@@ -277,16 +277,16 @@ const CreateListing = () => {
               {/* Class Level & Subject Filters */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="class_level">Class Level (optional)</Label>
+                <Label htmlFor="class_level">Klassenstufe (optional)</Label>
                   <Select value={formData.class_level || 'none'} onValueChange={(value) => setFormData({ ...formData, class_level: value === 'none' ? '' : value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select class" />
+                      <SelectValue placeholder="Klasse auswählen" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Not specified</SelectItem>
+                      <SelectItem value="none">Nicht angegeben</SelectItem>
                       {CLASS_LEVELS.map(level => (
                         <SelectItem key={level} value={level}>
-                          Class {level}
+                          Klasse {level}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -294,13 +294,13 @@ const CreateListing = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="subject">Subject (optional)</Label>
+                <Label htmlFor="subject">Fach (optional)</Label>
                   <Select value={formData.subject || 'none'} onValueChange={(value) => setFormData({ ...formData, subject: value === 'none' ? '' : value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select subject" />
+                      <SelectValue placeholder="Fach auswählen" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Not specified</SelectItem>
+                      <SelectItem value="none">Nicht angegeben</SelectItem>
                       {SUBJECTS.map(subject => (
                         <SelectItem key={subject} value={subject}>
                           {subject}
@@ -313,16 +313,16 @@ const CreateListing = () => {
 
               {/* Pickup Location */}
               <div className="space-y-2">
-                <Label htmlFor="pickup_location">Pickup Location (optional)</Label>
+                <Label htmlFor="pickup_location">Abholort (optional)</Label>
                 <Select 
                   value={formData.pickup_location_id || 'none'} 
                   onValueChange={(value) => setFormData({ ...formData, pickup_location_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Where can buyers pick up?" />
+                    <SelectValue placeholder="Wo können Käufer abholen?" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No specific location</SelectItem>
+                    <SelectItem value="none">Kein bestimmter Ort</SelectItem>
                     {pickupLocations.map(location => (
                       <SelectItem key={location.id} value={location.id}>
                         {location.name} - {location.description}
@@ -335,7 +335,7 @@ const CreateListing = () => {
               {/* Payment Methods (only for sale) */}
               {listingType === 'sale' && (
                 <div className="space-y-3">
-                  <Label>Accepted Payment Methods</Label>
+                  <Label>Akzeptierte Zahlungsmethoden</Label>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {PAYMENT_METHODS.map(method => (
                       <div key={method.id} className="flex items-center space-x-2">
@@ -357,7 +357,7 @@ const CreateListing = () => {
               )}
 
               <div className="space-y-2">
-                <Label>Images * (1-5 images)</Label>
+                <Label>Bilder * (1–5 Bilder)</Label>
                 <ImageUpload
                   images={images}
                   previews={previews}
@@ -367,7 +367,7 @@ const CreateListing = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creating...' : listingType === 'borrow' ? 'Create Borrowable Listing' : 'Create Listing'}
+                {loading ? 'Wird erstellt...' : listingType === 'borrow' ? 'Ausleihbares Inserat erstellen' : 'Inserat erstellen'}
               </Button>
             </form>
           </CardContent>

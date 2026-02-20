@@ -101,7 +101,7 @@ const NotificationBell = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
+    if (minutes < 1) return 'Gerade eben';
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
@@ -135,10 +135,10 @@ const NotificationBell = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <div className="flex items-center justify-between px-4 py-2 border-b">
-          <span className="font-semibold">Notifications</span>
+          <span className="font-semibold">Benachrichtigungen</span>
           {unreadCount > 0 && (
             <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-              Mark all read
+              Alle als gelesen markieren
             </Button>
           )}
         </div>
@@ -146,7 +146,7 @@ const NotificationBell = () => {
         <ScrollArea className="h-[300px]">
           {notifications.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              No notifications yet
+              Noch keine Benachrichtigungen
             </div>
           ) : (
             notifications.map((notification) => (

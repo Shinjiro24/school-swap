@@ -143,24 +143,24 @@ const Home = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Browse Marketplace
+            Marktplatz durchsuchen
           </h1>
-          <p className="text-muted-foreground">Find great deals on school items from your classmates</p>
+          <p className="text-muted-foreground">Finde tolle Angebote von deinen Mitschülern</p>
         </div>
 
         {/* Type Tabs */}
         <Tabs value={listingType} onValueChange={setListingType} className="mb-6">
           <TabsList>
             <TabsTrigger value="all" className="gap-2">
-              All Items
+              Alle Artikel
             </TabsTrigger>
             <TabsTrigger value="sale" className="gap-2">
               <BookOpen className="w-4 h-4" />
-              For Sale
+              Zu verkaufen
             </TabsTrigger>
             <TabsTrigger value="borrow" className="gap-2">
               <FileText className="w-4 h-4" />
-              Borrowable (Study Notes)
+              Ausleihbar (Lernzettel)
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -170,7 +170,7 @@ const Home = () => {
           <div className="md:col-span-2 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
-              placeholder="Search for items..."
+              placeholder="Artikel suchen..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -182,7 +182,7 @@ const Home = () => {
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">Alle Kategorien</SelectItem>
               {CATEGORIES.map(cat => (
                 <SelectItem key={cat} value={cat}>
                   {cat.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -197,7 +197,7 @@ const Home = () => {
             className="gap-2"
           >
             <SlidersHorizontal className="w-4 h-4" />
-            More Filters
+            Mehr Filter
             {activeFiltersCount > 0 && (
               <Badge variant="secondary" className="ml-1">{activeFiltersCount}</Badge>
             )}
@@ -212,10 +212,10 @@ const Home = () => {
                 <SelectValue placeholder="Class Level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Class Levels</SelectItem>
+                <SelectItem value="all">Alle Klassenstufen</SelectItem>
                 {CLASS_LEVELS.map(level => (
                   <SelectItem key={level} value={level}>
-                    Class {level}
+                    Klasse {level}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -226,7 +226,7 @@ const Home = () => {
                 <SelectValue placeholder="Subject" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Subjects</SelectItem>
+                <SelectItem value="all">Alle Fächer</SelectItem>
                 {SUBJECTS.map(subject => (
                   <SelectItem key={subject} value={subject}>
                     {subject}
@@ -240,10 +240,10 @@ const Home = () => {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="newest">Neueste zuerst</SelectItem>
+                <SelectItem value="oldest">Älteste zuerst</SelectItem>
+                <SelectItem value="price-low">Preis: Aufsteigend</SelectItem>
+                <SelectItem value="price-high">Preis: Absteigend</SelectItem>
               </SelectContent>
             </Select>
 
@@ -257,14 +257,14 @@ const Home = () => {
                 setListingType('all');
               }}
             >
-              Clear Filters
+              Filter zurücksetzen
             </Button>
           </div>
         )}
 
         {/* Results Count */}
         <p className="text-sm text-muted-foreground mb-4">
-          {filteredListings.length} {filteredListings.length === 1 ? 'listing' : 'listings'} found
+          {filteredListings.length} {filteredListings.length === 1 ? 'Inserat' : 'Inserate'} gefunden
         </p>
 
         {/* Listings Grid */}
@@ -276,9 +276,9 @@ const Home = () => {
           </div>
         ) : filteredListings.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg">No listings found</p>
+            <p className="text-muted-foreground text-lg">Keine Inserate gefunden</p>
             <Button asChild className="mt-4">
-              <Link to="/create-listing">Create the first listing!</Link>
+              <Link to="/create-listing">Erstes Inserat erstellen!</Link>
             </Button>
           </div>
         ) : (

@@ -112,7 +112,7 @@ const Messages = () => {
       if (!conversationMap.has(key)) {
         conversationMap.set(key, {
           listing_id: msg.listing_id,
-          listing_title: msg.listings?.title || 'Unknown Listing',
+          listing_title: msg.listings?.title || 'Unbekanntes Inserat',
           listing_image: msg.listings?.images?.[0] || '',
           other_user_id: otherUserId,
           other_user_name: '',
@@ -140,7 +140,7 @@ const Messages = () => {
       const profileMap = new Map(profiles?.map(p => [p.id, p.name]) || []);
       
       conversationMap.forEach(conv => {
-        conv.other_user_name = profileMap.get(conv.other_user_id) || 'Unknown User';
+        conv.other_user_name = profileMap.get(conv.other_user_id) || 'Unbekannter Nutzer';
       });
     }
 
@@ -195,7 +195,7 @@ const Messages = () => {
     }]);
 
     if (error) {
-      toast.error('Failed to send message');
+      toast.error('Nachricht konnte nicht gesendet werden');
     } else {
       setNewMessage('');
       fetchMessages();
@@ -213,7 +213,7 @@ const Messages = () => {
     if (days === 0) {
       return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
     } else if (days === 1) {
-      return 'Yesterday';
+      return 'Gestern';
     } else if (days < 7) {
       return date.toLocaleDateString('de-DE', { weekday: 'short' });
     } else {
@@ -230,20 +230,20 @@ const Messages = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
           <MessageCircle className="w-8 h-8 text-primary" />
-          <h1 className="text-3xl font-bold">Messages</h1>
+          <h1 className="text-3xl font-bold">Nachrichten</h1>
           {totalUnread > 0 && (
-            <Badge variant="destructive">{totalUnread} unread</Badge>
+            <Badge variant="destructive">{totalUnread} ungelesen</Badge>
           )}
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Loading messages...</div>
+          <div className="text-center py-12 text-muted-foreground">Nachrichten werden geladen...</div>
         ) : conversations.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <MessageCircle className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No messages yet</h3>
-              <p className="text-muted-foreground">When you message sellers or receive messages, they'll appear here.</p>
+              <h3 className="text-lg font-medium mb-2">Noch keine Nachrichten</h3>
+              <p className="text-muted-foreground">Wenn du Verkäufern schreibst oder Nachrichten erhältst, erscheinen sie hier.</p>
             </CardContent>
           </Card>
         ) : (
@@ -360,7 +360,7 @@ const Messages = () => {
                   <div className="p-4 border-t">
                     <div className="flex gap-2">
                       <Textarea
-                        placeholder="Type a message..."
+                        placeholder="Nachricht eingeben..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={(e) => {
@@ -382,7 +382,7 @@ const Messages = () => {
                 <div className="h-[600px] flex items-center justify-center text-muted-foreground">
                   <div className="text-center">
                     <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Select a conversation to view messages</p>
+                    <p>Wähle ein Gespräch aus, um Nachrichten anzuzeigen</p>
                   </div>
                 </div>
               )}

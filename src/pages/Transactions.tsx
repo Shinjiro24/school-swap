@@ -152,9 +152,9 @@ const Transactions = () => {
     });
 
     if (error) {
-      toast.error('Failed to submit rating');
+      toast.error('Bewertung konnte nicht abgesendet werden');
     } else {
-      toast.success('Rating submitted!');
+      toast.success('Bewertung abgesendet!');
       setShowRatingDialog(false);
       fetchTransactions();
     }
@@ -173,11 +173,11 @@ const Transactions = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500">Completed</Badge>;
+        return <Badge className="bg-green-500">Abgeschlossen</Badge>;
       case 'pending':
-        return <Badge variant="secondary">Pending</Badge>;
+        return <Badge variant="secondary">Ausstehend</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">Cancelled</Badge>;
+        return <Badge variant="destructive">Abgebrochen</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -207,33 +207,33 @@ const Transactions = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
           <History className="w-8 h-8 text-primary" />
-          <h1 className="text-3xl font-bold">Transaction History</h1>
+          <h1 className="text-3xl font-bold">Transaktionsverlauf</h1>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="purchases" className="gap-2">
               <ShoppingBag className="w-4 h-4" />
-              My Purchases
+              Meine Käufe
             </TabsTrigger>
             <TabsTrigger value="sales" className="gap-2">
               <Package className="w-4 h-4" />
-              My Sales
+              Meine Verkäufe
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab}>
             {loading ? (
-              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+              <div className="text-center py-12 text-muted-foreground">Lädt...</div>
             ) : transactions.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <History className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
+                  <h3 className="text-lg font-medium mb-2">Noch keine Transaktionen</h3>
                   <p className="text-muted-foreground">
                     {activeTab === 'purchases' 
-                      ? 'When you buy items, they\'ll appear here.'
-                      : 'When you sell items, they\'ll appear here.'}
+                      ? 'Wenn du Artikel kaufst, erscheinen sie hier.'
+                      : 'Wenn du Artikel verkaufst, erscheinen sie hier.'}
                   </p>
                 </CardContent>
               </Card>
@@ -262,7 +262,7 @@ const Transactions = () => {
                                 {transaction.listing?.title || 'Deleted Listing'}
                               </h3>
                               <p className="text-sm text-muted-foreground">
-                                {activeTab === 'purchases' ? 'From: ' : 'To: '}
+                                {activeTab === 'purchases' ? 'Von: ' : 'An: '}
                                 {activeTab === 'purchases' 
                                   ? transaction.seller?.name 
                                   : transaction.buyer?.name}
@@ -278,30 +278,30 @@ const Transactions = () => {
                           </div>
 
                           {transaction.status === 'completed' && !transaction.rating && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => openRatingDialog(transaction)}
-                            >
-                              <Star className="w-4 h-4 mr-2" />
-                              Rate {activeTab === 'purchases' ? 'Seller' : 'Buyer'}
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => openRatingDialog(transaction)}
+                              >
+                                <Star className="w-4 h-4 mr-2" />
+                                {activeTab === 'purchases' ? 'Verkäufer bewerten' : 'Käufer bewerten'}
                             </Button>
                           )}
 
                           {transaction.rating && (
                             <div className="mt-2 p-3 bg-muted/50 rounded-lg">
-                              <p className="text-sm font-medium mb-2">Your Rating</p>
+                              <p className="text-sm font-medium mb-2">Deine Bewertung</p>
                               <div className="grid gap-2 text-sm">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground w-32">Quality:</span>
-                                  <StarRating value={transaction.rating.product_quality || 0} />
+                                   <span className="text-muted-foreground w-32">Qualität:</span>
+                                   <StarRating value={transaction.rating.product_quality || 0} />
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground w-32">Communication:</span>
+                                  <span className="text-muted-foreground w-32">Kommunikation:</span>
                                   <StarRating value={transaction.rating.communication} />
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground w-32">Speed:</span>
+                                  <span className="text-muted-foreground w-32">Geschwindigkeit:</span>
                                   <StarRating value={transaction.rating.transaction_speed} />
                                 </div>
                                 {transaction.rating.comment && (
@@ -327,15 +327,15 @@ const Transactions = () => {
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rate Your Experience</DialogTitle>
+          <DialogTitle>Erfahrung bewerten</DialogTitle>
             <DialogDescription>
-              How was your experience with this transaction?
+              Wie war deine Erfahrung mit dieser Transaktion?
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <Label>Product Quality</Label>
+              <Label>Produktqualität</Label>
               <StarRating 
                 value={rating.product_quality} 
                 onChange={(v) => setRating({ ...rating, product_quality: v })} 
@@ -343,7 +343,7 @@ const Transactions = () => {
             </div>
             
             <div className="space-y-2">
-              <Label>Communication</Label>
+              <Label>Kommunikation</Label>
               <StarRating 
                 value={rating.communication} 
                 onChange={(v) => setRating({ ...rating, communication: v })} 
@@ -351,7 +351,7 @@ const Transactions = () => {
             </div>
             
             <div className="space-y-2">
-              <Label>Transaction Speed</Label>
+              <Label>Transaktionsgeschwindigkeit</Label>
               <StarRating 
                 value={rating.transaction_speed} 
                 onChange={(v) => setRating({ ...rating, transaction_speed: v })} 
@@ -359,9 +359,9 @@ const Transactions = () => {
             </div>
             
             <div className="space-y-2">
-              <Label>Comment (optional)</Label>
+              <Label>Kommentar (optional)</Label>
               <Textarea
-                placeholder="Share your experience..."
+                placeholder="Teile deine Erfahrung..."
                 value={rating.comment}
                 onChange={(e) => setRating({ ...rating, comment: e.target.value })}
                 rows={3}
@@ -371,10 +371,10 @@ const Transactions = () => {
           
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={() => setShowRatingDialog(false)}>
-              Cancel
+              Abbrechen
             </Button>
             <Button className="flex-1" onClick={submitRating}>
-              Submit Rating
+              Bewertung absenden
             </Button>
           </div>
         </DialogContent>

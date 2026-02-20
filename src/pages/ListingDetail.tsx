@@ -75,17 +75,17 @@ const ListingDetail = () => {
 
   const toggleFavorite = async () => {
     if (!user) {
-      toast.error('Please sign in to save favorites');
+      toast.error('Bitte melde dich an, um Favoriten zu speichern');
       return;
     }
 
     if (isFavorite) {
       await supabase.from('favorites').delete().eq('listing_id', id).eq('user_id', user.id);
-      toast.success('Removed from favorites');
+      toast.success('Von Favoriten entfernt');
       setIsFavorite(false);
     } else {
       await supabase.from('favorites').insert({ listing_id: id, user_id: user.id });
-      toast.success('Added to favorites');
+      toast.success('Zu Favoriten hinzugefügt');
       setIsFavorite(true);
     }
   };
@@ -94,7 +94,7 @@ const ListingDetail = () => {
     if (!user || !listing) return;
     
     if (message.trim().length < 1) {
-      toast.error('Please enter a message');
+      toast.error('Bitte gib eine Nachricht ein');
       return;
     }
 
@@ -107,9 +107,9 @@ const ListingDetail = () => {
     }]);
 
     if (error) {
-      toast.error('Failed to send message');
+      toast.error('Nachricht konnte nicht gesendet werden');
     } else {
-      toast.success('Message sent to seller!');
+      toast.success('Nachricht an Verkäufer gesendet!');
       setMessage('');
       setShowMessage(false);
     }
@@ -120,7 +120,7 @@ const ListingDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-8 text-center">Loading...</div>
+        <div className="container mx-auto px-4 py-8 text-center">Lädt...</div>
       </div>
     );
   }
@@ -134,7 +134,7 @@ const ListingDetail = () => {
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          Zurück
         </Button>
 
         <div className="grid gap-8 lg:grid-cols-2">
@@ -169,13 +169,13 @@ const ListingDetail = () => {
                 <div className="flex gap-2">
                   {listing.status === 'sold' && (
                     <Badge variant="destructive" className="bg-red-500">
-                      Sold
+                      Verkauft
                     </Badge>
                   )}
                   {listing.listing_type === 'borrow' && (
                     <Badge variant="secondary" className="bg-primary/10 text-primary">
                       <FileText className="w-3 h-3 mr-1" />
-                      Borrowable
+                      Ausleihbar
                     </Badge>
                   )}
                   <Badge>{listing.category}</Badge>
@@ -183,19 +183,19 @@ const ListingDetail = () => {
               </div>
               
               <p className="text-4xl font-bold text-primary mb-2">
-                {listing.listing_type === 'borrow' ? 'Free to Borrow' : `€${listing.price.toFixed(2)}`}
+              {listing.listing_type === 'borrow' ? 'Kostenlos zum Ausleihen' : `€${listing.price.toFixed(2)}`}
               </p>
               
               {listing.listing_type === 'borrow' && listing.borrow_duration_days && (
                 <p className="text-sm text-muted-foreground mb-2">
-                  Borrow period: {listing.borrow_duration_days} days
+                  Ausleihzeitraum: {listing.borrow_duration_days} Tage
                 </p>
               )}
               
               {(listing.class_level || listing.subject) && (
                 <div className="flex gap-2 mb-4">
                   {listing.class_level && (
-                    <Badge variant="outline">Class {listing.class_level}</Badge>
+                    <Badge variant="outline">Klasse {listing.class_level}</Badge>
                   )}
                   {listing.subject && (
                     <Badge variant="outline">{listing.subject}</Badge>
@@ -209,16 +209,16 @@ const ListingDetail = () => {
             {listing.seller && (
               <Card>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Seller Information</h3>
+                  <h3 className="font-semibold mb-2">Verkäufer-Informationen</h3>
                   <p className="text-sm text-muted-foreground">Name: {listing.seller.name}</p>
-                  <p className="text-sm text-muted-foreground">Grade: {listing.seller.grade}</p>
+                  <p className="text-sm text-muted-foreground">Klasse: {listing.seller.grade}</p>
                 </CardContent>
               </Card>
             )}
 
             {listing.payment_method && listing.payment_method.length > 0 && listing.listing_type !== 'borrow' && (
               <div>
-                <h3 className="font-semibold mb-2 text-sm">Accepted Payment Methods</h3>
+                <h3 className="font-semibold mb-2 text-sm">Akzeptierte Zahlungsmethoden</h3>
                 <div className="flex gap-2 flex-wrap">
                   {listing.payment_method.map((method: string) => (
                     <Badge key={method} variant="outline" className="capitalize">
@@ -232,7 +232,7 @@ const ListingDetail = () => {
             <div className="flex flex-col gap-3">
               {listing.status === 'sold' ? (
                 <div className="w-full p-4 bg-muted rounded-lg text-center">
-                  <p className="text-muted-foreground font-medium">This item has been sold</p>
+                  <p className="text-muted-foreground font-medium">Dieser Artikel wurde verkauft</p>
                 </div>
               ) : listing.seller_id !== user?.id && (
                 <Button
@@ -241,7 +241,7 @@ const ListingDetail = () => {
                   onClick={() => setShowBuyModal(true)}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  {listing.listing_type === 'borrow' ? 'Borrow This Item' : 'Buy Now'}
+                  {listing.listing_type === 'borrow' ? 'Artikel ausleihen' : 'Jetzt kaufen'}
                 </Button>
               )}
               
@@ -253,7 +253,7 @@ const ListingDetail = () => {
                   disabled={listing.seller_id === user?.id}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Contact Seller
+                  Verkäufer kontaktieren
                 </Button>
                 <Button
                   variant="outline"
@@ -278,12 +278,12 @@ const ListingDetail = () => {
       <Dialog open={showMessage} onOpenChange={setShowMessage}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send Message</DialogTitle>
-            <DialogDescription>Send a message to the seller about this listing</DialogDescription>
+          <DialogTitle>Nachricht senden</DialogTitle>
+            <DialogDescription>Sende dem Verkäufer eine Nachricht zu diesem Inserat</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Textarea
-              placeholder="Hi, I'm interested in this item..."
+              placeholder="Hallo, ich bin an diesem Artikel interessiert..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
@@ -293,7 +293,7 @@ const ListingDetail = () => {
               onClick={sendMessage}
               disabled={sendingMessage}
             >
-              {sendingMessage ? 'Sending...' : 'Send Message'}
+              {sendingMessage ? 'Wird gesendet...' : 'Nachricht senden'}
             </Button>
           </div>
         </DialogContent>
@@ -313,7 +313,7 @@ const ListingDetail = () => {
           listing={listing}
           userId={user.id}
           onSuccess={() => {
-            toast.success('Check your messages to coordinate with the seller!');
+            toast.success('Schau in deine Nachrichten, um dich mit dem Verkäufer abzustimmen!');
           }}
         />
       )}
